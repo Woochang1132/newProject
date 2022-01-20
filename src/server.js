@@ -15,14 +15,25 @@ const handleListen = () => console.log(`Listening on http://localhost:3000`);
 const server = http.createServer(app);
 const wss = new WebSocket.Server({server});
 
+function onSocketClose(){
+    console.log("Disconnected from the Browser");
+}
+
+function onSocketMessage(message){
+    console.log(message);
+}
+
 const sockets = [];
 
-wss.on("connection", (socket) =>{
-    sockets.push(socket);
+wss.on("connection", (socket) =>{  //브라우저마다 연결된 socket에서 이벤트를 listen할 수 있다.
+    
     console.log("Connected to Browser ✔");
-    socket.on("close", () => {
-        console.log("Disconected From Browser ❌");
-    });
+    
+    socket.on("close", onSocketClose);
+    socket.on("message", onSocketMessage);
+    
+    socket.send("hello!!");
+
     socket.on('message', (message) => {
         const translatedMessageData = message.toString('utf8');
         socket.send(translatedMessageData);
