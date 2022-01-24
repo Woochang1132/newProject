@@ -1,6 +1,7 @@
 import http from "http";
 import WebSocket from "ws";
 import express from "express";
+import { SocketAddress } from "net";
 
 const app = express();
 
@@ -19,20 +20,26 @@ function onSocketClose(){
     console.log("Disconnected from the Browser");
 }
 
-function onSocketMessage(message){
-    console.log(message);
-}
 
-const sockets = [];
+
+const sockets = []; //누군가 connection을 하게 되면 여기에 저장되도록 진행한다. 소캣이 생성되서 저장이 되는 것이다.
 
 wss.on("connection", (socket) =>{  //브라우저마다 연결된 socket에서 이벤트를 listen할 수 있다.
-    
+    sockets.push(socket);
+    socket["nickname"] = "Anon";
     console.log("Connected to Browser ✔");
-    
     socket.on("close", onSocketClose);
-    socket.on("message", onSocketMessage);
-    
-    socket.send("hello!!");
+    socket.on("message", (msg) => {
+        const message = JSON.parse(msg);
+        switch (message.type) {
+          case "new_message":
+            sockets.forEach((aSocket) =>
+              aSocket.send(`${socket.nickname}: ${message.payload}`)
+            );
+          case "nickname":
+            socket["nickname"] = message.payload;
+        }
+      });
 
     socket.on('message', (message) => {
         const translatedMessageData = message.toString('utf8');
@@ -41,3 +48,4 @@ wss.on("connection", (socket) =>{  //브라우저마다 연결된 socket에서 �
 });
 
 server.listen(3000, handleListen);
+
