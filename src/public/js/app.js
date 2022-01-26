@@ -112,15 +112,10 @@ async function getCameras() {
   try {
     const devices = await navigator.mediaDevices.enumerateDevices();
     const cameras = devices.filter((device) => device.kind === "videoinput");
-    const currentCamera = myStream.getVideoTracks()[0];
-    
     cameras.forEach((camera) => {
       const option = document.createElement("option");
       option.value = camera.deviceId;
       option.innerText = camera.label;
-      if(currentCamera.label == camera.label){
-          option.selected - true;
-      }
       cameraSelect.appendChild(option);
     });
   } catch (e) {
@@ -128,24 +123,15 @@ async function getCameras() {
   }
 }
 
-//미디어, 화면을 가져온다.
-async function getMedia(deviceId) {
-  const initialConstrains = {
-    audio: true,
-    video: { facingMode: "user"},
-  };
-  const cameraConstraints = {
-    audio:true,
-    video:{deviceId: { exact: deviceId} },
-  };
+
+async function getMedia() {
   try {
-    myStream = await navigator.mediaDevices.getUserMedia(
-      deviceId ? cameraConstraints : initialConstrains
-    );
+    myStream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: true,
+    });
     myFace.srcObject = myStream;
-    if(!deviceId){
-      await getCameras();
-    }
+    await getCameras();
   } catch (e) {
     console.log(e);
   }
@@ -153,8 +139,6 @@ async function getMedia(deviceId) {
 
 getMedia();
 
-
-//음소거 버튼 funtion
 function handleMuteClick() {
   myStream
   .getAudioTracks()
@@ -168,8 +152,6 @@ function handleMuteClick() {
   }
 }
 
-
-// 카메라 on/off 기능
 function handleCameraClick() {
   myStream
   .getVideoTracks()
@@ -187,16 +169,6 @@ muteBtn.addEventListener("click", handleMuteClick);
 cameraBtn.addEventListener("click", handleCameraClick);
 
 
-
-async function handleCameraChange(){
-  await getMedia(cameraSelect.value);
-}
-
-  //카메라 선택
-    cameraSelect.addEventListener("input", handleCameraChange);
-
-
-
 	// 좌우반전
 	$("#check01").change(function() {
 		if($("#check01").is(":checked")) {
@@ -208,10 +180,7 @@ async function handleCameraChange(){
 
 
 
-
-
-//풀 스크린, 원래 화면, 토큰을 활용한 풀 스크린
-const enterFullscreenBtn = document.querySelector('.enterFullscreenBtn')
+  const enterFullscreenBtn = document.querySelector('.enterFullscreenBtn')
 const exitFullscreenBtn = document.querySelector('.exitFullscreenBtn')
 const toggleFullscreenBtn = document.querySelector('.toggleFullscreenBtn')
 
