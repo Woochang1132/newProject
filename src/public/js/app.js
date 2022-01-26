@@ -1,8 +1,15 @@
 const socket = io();
 
 const welcome = document.getElementById("welcome");
+
+
 const form = welcome.querySelector("form");
 const room = document.getElementById("room");
+
+const call = document.getElementById("call");
+
+call.hidden = true;
+
 
 room.hidden = true;
 
@@ -43,10 +50,18 @@ function showRoom() {
   nameform.addEventListener("submit", handleNicknameSubmit);
 }
 
+function startMedia(){
+  welcome.hidden = true;
+  call.hidden = false;
+  getMedia();
+}
+
+
+
 function handleRoomSubmit(event){
     event.preventDefault();
     const input = form.querySelector("input");
-    socket.emit("enter_room", input.value, showRoom);
+    socket.emit("enter_room", input.value, showRoom, startMedia);
     roomName = input.value;
     input.value = "";
 }
